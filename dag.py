@@ -58,7 +58,7 @@ def TFG_Demo_dag():
     )
 
     @task.kubernetes(
-        image='clarusproject/dag-image:1.0.0-slim',
+        image='mfernandezlabastida/gpu_test:0.2',
         name='get_dataframe',
         task_id='get_dataframe',
         namespace='airflow',
