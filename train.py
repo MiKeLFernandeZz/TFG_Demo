@@ -1,12 +1,13 @@
-import mlflow
-import mlflow.pytorch
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.utils.data import DataLoader, random_split
+from torchvision import transforms
+from torch.utils.data import DataLoader, random_split, TensorDataset
+import pandas as pd
+import mlflow
+import mlflow.pytorch
 
-def train_and_evaluate(device_type='cuda', epochs=3, batch_size=64, learning_rate=0.001, dataset=None):
+def train_and_evaluate(df, device_type='cuda', epochs=3, batch_size=64, learning_rate=0.001):
     # Verificar el dispositivo
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -18,7 +19,12 @@ def train_and_evaluate(device_type='cuda', epochs=3, batch_size=64, learning_rat
         device = torch.device("cpu")
         num_gpus = 0
         print("No hay GPUs disponibles")
-    
+
+    # Convertir DataFrame a tensores y crear el TensorDataset
+    images = torch.tensor([item for item in df["image"].values], dtype=torch.float32).reshape(-1, 1, 28, 28)
+    labels = torch.tensor(df["label"].values, dtype=torch.long)
+    dataset = TensorDataset(images, labels)
+
     # Separar en conjuntos de entrenamiento y prueba
     train_size = int(0.8 * len(dataset))
     test_size = len(dataset) - train_size
