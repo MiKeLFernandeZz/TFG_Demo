@@ -112,7 +112,7 @@ def TFG_Demo_dag():
             limits={'cpu': '0.5', 'nvidia.com/gpu': '1'}
         ),
         full_pod_spec=pod_spec,
-        priority_class_name='undefined',
+        priority_class_name='medium-priority',
         env_vars=env_vars
     )
     def train_GPU_task(df_id):
