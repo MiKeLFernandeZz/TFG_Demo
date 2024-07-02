@@ -97,6 +97,7 @@ def TFG_Demo_dag():
     
     @task.kubernetes(
         image='mfernandezlabastida/gpu_test:0.2',
+        image_pull_policy='Always',
         name='train_GPU',
         task_id='train_GPU',
         namespace='airflow',
@@ -134,6 +135,7 @@ def TFG_Demo_dag():
         
     @task.kubernetes(
         image='mfernandezlabastida/gpu_test:0.2',
+        image_pull_policy='Always',
         name='train_CPU',
         task_id='train_CPU',
         namespace='airflow',
@@ -169,6 +171,7 @@ def TFG_Demo_dag():
         
     @task.kubernetes(
         image='clarusproject/dag-image:1.0.0-slim',
+        image_pull_policy='Always',
         name='redis_clean',
         task_id='redis_clean',
         namespace='airflow',
