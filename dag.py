@@ -133,41 +133,6 @@ def TFG_Demo_dag():
         
         
     @task.kubernetes(
-        image='mfernandezlabastida/gpu_test:0.2',
-        name='train_CPU',
-        task_id='train_CPU',
-        namespace='airflow',
-        init_containers=[init_container],
-        volumes=[volume],
-        volume_mounts=[volume_mount],
-        do_xcom_push=True,
-        container_resources=k8s.V1ResourceRequirements(
-            requests={'cpu': '0.5'},
-            limits={'cpu': '0.5'}
-        ),
-        priority_class_name='medium-priority',
-        env_vars=env_vars
-    )
-    def train_CPU_task(df_id):
-        import sys
-        import redis
-        import uuid
-        import pickle
-    
-        sys.path.insert(1, '/git/TFG_Demo/')
-        from train import train_and_evaluate
-        
-        redis_client = redis.StrictRedis(
-            host='redis-headless.redis.svc.cluster.local',
-            port=6379,
-            password='pass'
-        )
-        df = pickle.loads(redis_client.get(df_id))
-    
-        return train_and_evaluate(df)
-        
-        
-    @task.kubernetes(
         image='clarusproject/dag-image:1.0.0-slim',
         name='redis_clean',
         task_id='redis_clean',
@@ -191,10 +156,9 @@ def TFG_Demo_dag():
     
     get_dataframe_result = get_dataframe_task()
     train_GPU_result = train_GPU_task(get_dataframe_result)
-    train_CPU_result = train_CPU_task(get_dataframe_result)
     redis_task_result = redis_clean_task([get_dataframe_result])
     
     # Define the order of the pipeline
-    get_dataframe_result >> [train_GPU_result, train_CPU_result] >> redis_task_result
+    get_dataframe_result >> train_GPU_result >> redis_task_result
 # Call the DAG 
 TFG_Demo_dag()

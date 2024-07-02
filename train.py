@@ -87,7 +87,9 @@ def train_and_evaluate(df, device_type='cuda', epochs=3, batch_size=64, learning
         print(f'\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({accuracy:.0f}%)\n')
         return test_loss, accuracy
 
-    # Iniciar el registro con mlflow
+    # Configurar y registrar el experimento con mlflow
+    mlflow.set_experiment("TFG_DEMO")
+
     with mlflow.start_run():
         # Registrar hiperparámetros
         mlflow.log_param("device_type", device_type)
