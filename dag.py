@@ -164,6 +164,9 @@ def Redwine_production_example():
         import redis
         import uuid
         import pickle
+
+        import mlflow
+        import os
     
         sys.path.insert(1, '/git/TFG_Demo/src/redwine')
         from Models.ElasticNet_model_training import elasticNet_model_training
@@ -178,8 +181,16 @@ def Redwine_production_example():
             password='pass'
         )
         dp = pickle.loads(redis_client.get(dp_id))
-    
-        return elasticNet_model_training(dp)
+
+        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
+        mlflow_experiment = "redwine_production_test"
+
+        mlflow.set_tracking_uri(mlflow_endpoint)
+        mlflow.set_experiment(mlflow_experiment)
+        mlflow.autolog()
+
+        with mlflow.start_run():
+            return elasticNet_model_training(dp)
         
         
     @task.kubernetes(
@@ -203,6 +214,9 @@ def Redwine_production_example():
         import redis
         import uuid
         import pickle
+
+        import mlflow
+        import os
     
         sys.path.insert(1, '/git/TFG_Demo/src/redwine')
         from Models.SVC_model_training import svc_model_training
@@ -217,8 +231,16 @@ def Redwine_production_example():
             password='pass'
         )
         dp = pickle.loads(redis_client.get(dp_id))
-    
-        return svc_model_training(dp)
+
+        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
+        mlflow_experiment = "redwine_production_test"
+
+        mlflow.set_tracking_uri(mlflow_endpoint)
+        mlflow.set_experiment(mlflow_experiment)
+        mlflow.autolog()
+
+        with mlflow.start_run():
+            return svc_model_training(dp)
         
         
     @task.kubernetes(
