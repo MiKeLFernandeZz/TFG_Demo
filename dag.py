@@ -326,6 +326,8 @@ def Redwine_production_example():
                     if line.strip() not in required_packages:
                         f.write(line)
 
+                f.write("\n")
+
                 for package in required_packages:
                     f.write(f"{package}\n")
 
