@@ -316,7 +316,7 @@ def Redwine_production_example():
                         os.rename(os.path.join(root, file), os.path.join(path, file))
 
         def modify_requirements_file(path):
-            required_packages = ["fastapi", "uvicorn", "pydantic", "numpy", "typing-extension"]
+            required_packages = ["fastapi", "uvicorn", "pydantic", "numpy"]
 
             with open(f"{path}/requirements.txt", "r") as f:
                 lines = f.readlines()
