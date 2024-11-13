@@ -8,7 +8,7 @@ import uvicorn
 app = FastAPI()
 
 # Cargar el modelo desde un archivo local
-model_path = "artifacts/model/model.pkl"  # Reemplaza con la ruta a tu modelo
+model_path = "model/model.pkl"  # Reemplaza con la ruta a tu modelo
 with open(model_path, "rb") as model_file:
     model = pickle.load(model_file)
 
