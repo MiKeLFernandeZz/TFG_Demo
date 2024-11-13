@@ -182,15 +182,15 @@ def Redwine_production_example():
         )
         dp = pickle.loads(redis_client.get(dp_id))
 
-        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
-        mlflow_experiment = "redwine_production_test"
+        # mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
+        # mlflow_experiment = "redwine_production_test"
 
-        mlflow.set_tracking_uri(mlflow_endpoint)
-        mlflow.set_experiment(mlflow_experiment)
-        mlflow.autolog()
+        # mlflow.set_tracking_uri(mlflow_endpoint)
+        # mlflow.set_experiment(mlflow_experiment)
+        # mlflow.autolog()
 
-        with mlflow.start_run():
-            return elasticNet_model_training(dp)
+        # with mlflow.start_run():
+        return elasticNet_model_training(dp)
         
         
     @task.kubernetes(
@@ -232,15 +232,15 @@ def Redwine_production_example():
         )
         dp = pickle.loads(redis_client.get(dp_id))
 
-        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
-        mlflow_experiment = "redwine_production_test"
+        # mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
+        # mlflow_experiment = "redwine_production_test"
 
-        mlflow.set_tracking_uri(mlflow_endpoint)
-        mlflow.set_experiment(mlflow_experiment)
-        mlflow.autolog()
+        # mlflow.set_tracking_uri(mlflow_endpoint)
+        # mlflow.set_experiment(mlflow_experiment)
+        # mlflow.autolog()
 
-        with mlflow.start_run():
-            return svc_model_training(dp)
+        # with mlflow.start_run():
+        return svc_model_training(dp)
         
         
     @task.kubernetes(
@@ -269,6 +269,68 @@ def Redwine_production_example():
         """
         
         return select_best_model()
+    
+    @task.kubernetes(
+        image='mfernandezlabastida/kaniko:1.0',
+        name='build_inference',
+        task_id='build_inference',
+        namespace='airflow',
+        init_containers=[init_container],
+        volumes=[volume],
+        volume_mounts=[volume_mount],
+        do_xcom_push=True,
+        container_resources=k8s.V1ResourceRequirements(
+            requests={'cpu': '0.5'},
+            limits={'cpu': '0.5'}
+        ),
+        priority_class_name='medium-priority',
+        env_vars=env_vars
+    )
+    def build_inference_task(run_id):
+        import mlflow
+        import os
+        import logging
+        import subprocess
+
+        """
+        MODIFY WHAT YOU WANT
+        """
+        path = '/git/TFG_Demo/build_docker'
+        endpoint = 'registry-docker-registry.registry.svc.cluster.local:5001/redwine:prod'
+
+
+        def download_artifacts(run_id, path):
+            mlflow.set_tracking_uri("http://mlflow-tracking.mlflow.svc.cluster.local:5000")
+
+            local_path = mlflow.artifacts.download_artifacts(run_id=run_id, dst_path=path)
+
+            # Buscar el archivo model.pkl y moverlo a la carpeta local_path en caso de que se encuentre en una subcarpeta
+            for root, dirs, files in os.walk(local_path):
+                for file in files:
+                    if file.startswith("model"):
+                        logging.info(f"Encontrado archivo model.pkl en: {root}")
+                        os.rename(os.path.join(root, file), os.path.join(local_path + '/model', file))
+                    elif file.startswith("requirements"):
+                        logging.info(f"Encontrado archivo requirements.txt en: {root}")
+                        os.rename(os.path.join(root, file), os.path.join(path, file))
+
+        logging.warning(f"Downloading artifacts from run_id: {run_id}")
+        download_artifacts(run_id, path)
+
+        args = [
+            "/kaniko/executor",
+            f"--dockerfile={path}/Dockerfile",
+            f"--context={path}",
+            f"--destination={endpoint}",
+            f"--cache=false"
+        ]
+        result = subprocess.run(
+            args,
+            check=True  # Lanza una excepción si el comando devuelve un código diferente de cero
+        )
+        logging.warning(f"Kaniko executor finished with return code: {result.returncode}")
+        
+        
         
         
     @task.kubernetes(
@@ -298,6 +360,7 @@ def Redwine_production_example():
     train_elastic_result = train_elastic_task(process_df_result)
     SVC_train_result = SVC_train_task(process_df_result)
     select_best_result = select_best_task()
+    build_inference = build_inference_task(select_best_result)
     redis_task_result = redis_clean_task([read_df_result, process_df_result])
     
     # Define the order of the pipeline
