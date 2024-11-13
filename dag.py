@@ -364,6 +364,6 @@ def Redwine_production_example():
     redis_task_result = redis_clean_task([read_df_result, process_df_result])
     
     # Define the order of the pipeline
-    read_df_result >> process_df_result >> [train_elastic_result, SVC_train_result] >> select_best_result >> redis_task_result
+    read_df_result >> process_df_result >> [train_elastic_result, SVC_train_result] >> select_best_result >> build_inference >> redis_task_result
 # Call the DAG 
 Redwine_production_example()
