@@ -314,8 +314,8 @@ def Redwine_production_example():
                         logging.info(f"Encontrado archivo requirements.txt en: {root}")
                         os.rename(os.path.join(root, file), os.path.join(path, file))
 
-        logging.warning(f"Downloading artifacts from run_id: {run_id}")
-        download_artifacts(run_id, path)
+        logging.warning(f"Downloading artifacts from run_id: {run_id.best_run}")
+        download_artifacts(run_id.best_run, path)
 
         args = [
             "/kaniko/executor",
