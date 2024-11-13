@@ -282,7 +282,7 @@ def Redwine_production_example():
         do_xcom_push=True,
         container_resources=k8s.V1ResourceRequirements(
             requests={'cpu': '0.5'},
-            limits={'cpu': '0.5'}
+            limits={'cpu': '1.5'}
         ),
         priority_class_name='medium-priority',
         env_vars=env_vars
