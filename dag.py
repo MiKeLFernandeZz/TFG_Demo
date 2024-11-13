@@ -315,8 +315,24 @@ def Redwine_production_example():
                         logging.info(f"Encontrado archivo requirements.txt en: {root}")
                         os.rename(os.path.join(root, file), os.path.join(path, file))
 
+        def modify_requirements_file(path):
+            required_packages = ["fastapi", "uvicorn", "pydantic", "numpy", "typing-extension"]
+
+            with open(f"{path}/requirements.txt", "r") as f:
+                lines = f.readlines()
+
+            with open(f"{path}/requirements.txt", "w") as f:
+                for line in lines:
+                    if line.strip() not in required_packages:
+                        f.write(line)
+
+                for package in required_packages:
+                    f.write(f"{package}\n")
+
+
         logging.warning(f"Downloading artifacts from run_id: {run_id['best_run']}")
         download_artifacts(run_id['best_run'], path)
+        modify_requirements_file(path)
 
         args = [
             "/kaniko/executor",
