@@ -56,7 +56,7 @@ def elasticNet_model_training(data: Dict[str, Any]):
             validation_metrics = utils.eval_metrics(val_y, predicted_qualities, 'validation')
 
             # Track the run
-            last_run = utils.track_run(run_name, estimator_name, hyperparams, training_metrics, validation_metrics, lr)
+            # last_run = utils.track_run(run_name, estimator_name, hyperparams, training_metrics, validation_metrics, lr)
             # runs_list.append(last_run)
 
     # return {'elasticNet_runs_list': runs_list}

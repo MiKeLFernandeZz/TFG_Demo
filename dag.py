@@ -183,15 +183,15 @@ def Redwine_production_example():
         )
         dp = pickle.loads(redis_client.get(dp_id))
 
-        # mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
-        # mlflow_experiment = "redwine_production_test"
+        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
+        mlflow_experiment = "redwine_production_test"
 
-        # mlflow.set_tracking_uri(mlflow_endpoint)
-        # mlflow.set_experiment(mlflow_experiment)
-        # mlflow.autolog()
+        mlflow.set_tracking_uri(mlflow_endpoint)
+        mlflow.set_experiment(mlflow_experiment)
+        mlflow.autolog()
 
-        # with mlflow.start_run():
-        return elasticNet_model_training(dp)
+        with mlflow.start_run():
+            return elasticNet_model_training(dp)
         
         
     @task.kubernetes(
@@ -233,15 +233,15 @@ def Redwine_production_example():
         )
         dp = pickle.loads(redis_client.get(dp_id))
 
-        # mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
-        # mlflow_experiment = "redwine_production_test"
+        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
+        mlflow_experiment = "redwine_production_test"
 
-        # mlflow.set_tracking_uri(mlflow_endpoint)
-        # mlflow.set_experiment(mlflow_experiment)
-        # mlflow.autolog()
+        mlflow.set_tracking_uri(mlflow_endpoint)
+        mlflow.set_experiment(mlflow_experiment)
+        mlflow.autolog()
 
-        # with mlflow.start_run():
-        return svc_model_training(dp)
+        with mlflow.start_run():
+            return svc_model_training(dp)
         
         
     @task.kubernetes(
