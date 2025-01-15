@@ -4,13 +4,13 @@ from kubernetes.client import models as k8s
 from airflow.models import Variable
 
 @dag(
-    description='Demo',
+    description='Esto es una demo de CT1',
     schedule_interval=None, 
-    start_date=datetime(2024, 11, 12),
+    start_date=datetime(2025, 1, 15),
     catchup=False,
-    tags=['demo', 'redwine', 'mlflow', 'production'],
+    tags=['demo', 'CT1'],
 )
-def Redwine_production_example():
+def Demo_CT1():
 
     env_vars={
         "POSTGRES_USERNAME": Variable.get("POSTGRES_USERNAME"),
@@ -25,8 +25,7 @@ def Redwine_production_example():
         "MLFLOW_ENDPOINT": Variable.get("MLFLOW_ENDPOINT"),
         "MLFLOW_TRACKING_URI": Variable.get("MLFLOW_ENDPOINT"),
         "MLFLOW_TRACKING_USERNAME": Variable.get("MLFLOW_TRACKING_USERNAME"),
-        "MLFLOW_TRACKING_PASSWORD": Variable.get("MLFLOW_TRACKING_PASSWORD"),
-        "container": "docker"
+        "MLFLOW_TRACKING_PASSWORD": Variable.get("MLFLOW_TRACKING_PASSWORD")
     }
 
     volume_mount = k8s.V1VolumeMount(
@@ -61,8 +60,8 @@ def Redwine_production_example():
 
     @task.kubernetes(
         image='clarusproject/dag-image:1.0.0-slim',
-        name='read_df',
-        task_id='read_df',
+        name='read',
+        task_id='read',
         namespace='airflow',
         init_containers=[init_container],
         volumes=[volume],
@@ -75,7 +74,7 @@ def Redwine_production_example():
         priority_class_name='medium-priority',
         env_vars=env_vars
     )
-    def read_df_task():
+    def read_task():
         import sys
         import redis
         import uuid
@@ -103,8 +102,8 @@ def Redwine_production_example():
     
     @task.kubernetes(
         image='clarusproject/dag-image:1.0.0-slim',
-        name='process_df',
-        task_id='process_df',
+        name='process',
+        task_id='process',
         namespace='airflow',
         init_containers=[init_container],
         volumes=[volume],
@@ -117,7 +116,7 @@ def Redwine_production_example():
         priority_class_name='medium-priority',
         env_vars=env_vars
     )
-    def process_df_task(df_id):
+    def process_task(df_id):
         import sys
         import redis
         import uuid
@@ -146,78 +145,25 @@ def Redwine_production_example():
     
     @task.kubernetes(
         image='clarusproject/dag-image:1.0.0-slim',
-        name='train_elastic',
-        task_id='train_elastic',
+        name='svc',
+        task_id='svc',
         namespace='airflow',
         init_containers=[init_container],
         volumes=[volume],
         volume_mounts=[volume_mount],
         do_xcom_push=True,
         container_resources=k8s.V1ResourceRequirements(
-            requests={'cpu': '0.5'},
-            limits={'cpu': '0.5'}
+            requests={'cpu': '1.5'},
+            limits={'cpu': '1.5'}
         ),
         priority_class_name='medium-priority',
         env_vars=env_vars
     )
-    def train_elastic_task(dp_id):
+    def svc_task(dp_id):
         import sys
         import redis
         import uuid
         import pickle
-
-        import mlflow
-        import os
-    
-        sys.path.insert(1, '/git/TFG_Demo/src/redwine')
-        from Models.ElasticNet_model_training import elasticNet_model_training
-        
-        """
-        MODIFY WHAT YOU WANT
-        """
-        
-        redis_client = redis.StrictRedis(
-            host='redis-headless.redis.svc.cluster.local',
-            port=6379,
-            password='pass'
-        )
-        dp = pickle.loads(redis_client.get(dp_id))
-
-        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
-        mlflow_experiment = "redwine_production_test"
-
-        mlflow.set_tracking_uri(mlflow_endpoint)
-        mlflow.set_experiment(mlflow_experiment)
-        mlflow.autolog()
-
-        with mlflow.start_run():
-            return elasticNet_model_training(dp)
-        
-        
-    @task.kubernetes(
-        image='clarusproject/dag-image:1.0.0-slim',
-        name='SVC_train',
-        task_id='SVC_train',
-        namespace='airflow',
-        init_containers=[init_container],
-        volumes=[volume],
-        volume_mounts=[volume_mount],
-        do_xcom_push=True,
-        container_resources=k8s.V1ResourceRequirements(
-            requests={'cpu': '0.5'},
-            limits={'cpu': '0.5'}
-        ),
-        priority_class_name='medium-priority',
-        env_vars=env_vars
-    )
-    def SVC_train_task(dp_id):
-        import sys
-        import redis
-        import uuid
-        import pickle
-
-        import mlflow
-        import os
     
         sys.path.insert(1, '/git/TFG_Demo/src/redwine')
         from Models.SVC_model_training import svc_model_training
@@ -232,16 +178,47 @@ def Redwine_production_example():
             password='pass'
         )
         dp = pickle.loads(redis_client.get(dp_id))
-
-        mlflow_endpoint = os.getenv("MLFLOW_ENDPOINT")
-        mlflow_experiment = "redwine_production_test"
-
-        mlflow.set_tracking_uri(mlflow_endpoint)
-        mlflow.set_experiment(mlflow_experiment)
-        mlflow.autolog()
-
-        with mlflow.start_run():
-            return svc_model_training(dp)
+    
+        return svc_model_training(dp)
+        
+        
+    @task.kubernetes(
+        image='clarusproject/dag-image:1.0.0-slim',
+        name='elastic',
+        task_id='elastic',
+        namespace='airflow',
+        init_containers=[init_container],
+        volumes=[volume],
+        volume_mounts=[volume_mount],
+        do_xcom_push=True,
+        container_resources=k8s.V1ResourceRequirements(
+            requests={'cpu': '1.5'},
+            limits={'cpu': '1.5'}
+        ),
+        priority_class_name='medium-priority',
+        env_vars=env_vars
+    )
+    def elastic_task(dp_id):
+        import sys
+        import redis
+        import uuid
+        import pickle
+    
+        sys.path.insert(1, '/git/TFG_Demo/src/redwine')
+        from Models.ElasticNet_model_training import elasticNet_model_training
+        
+        """
+        MODIFY WHAT YOU WANT
+        """
+        
+        redis_client = redis.StrictRedis(
+            host='redis-headless.redis.svc.cluster.local',
+            port=6379,
+            password='pass'
+        )
+        dp = pickle.loads(redis_client.get(dp_id))
+    
+        return elasticNet_model_training(dp)
         
         
     @task.kubernetes(
@@ -269,12 +246,14 @@ def Redwine_production_example():
         MODIFY WHAT YOU WANT
         """
         
-        return select_best_model()
+        run_id = select_best_model()
+        
+        return run_id
     
     @task.kubernetes(
-        image='mfernandezlabastida/kaniko:1.0',
-        name='build_inference',
-        task_id='build_inference',
+        image='clarusproject/dag-image:1.0.0-slim',
+        name='build',
+        task_id='build',
         namespace='airflow',
         init_containers=[init_container],
         volumes=[volume],
@@ -282,74 +261,21 @@ def Redwine_production_example():
         do_xcom_push=True,
         container_resources=k8s.V1ResourceRequirements(
             requests={'cpu': '0.5'},
-            limits={'cpu': '1.5'}
+            limits={'cpu': '0.5'}
         ),
         priority_class_name='medium-priority',
         env_vars=env_vars
     )
-    def build_inference_task(run_id):
-        import mlflow
-        import os
-        import logging
-        import subprocess
-
+    def build_task(run_id):
+        import sys
+        sys.path.insert(1, '/git/TFG_Demo/src/redwine')
+        from Build.build import build_inference
+        
         """
         MODIFY WHAT YOU WANT
         """
-        path = '/git/TFG_Demo/build_docker'
-        endpoint = 'registry-docker-registry.registry.svc.cluster.local:5001/redwine:prod'
-
-
-        def download_artifacts(run_id, path):
-            mlflow.set_tracking_uri("http://mlflow-tracking.mlflow.svc.cluster.local:5000")
-
-            local_path = mlflow.artifacts.download_artifacts(run_id=run_id, dst_path=path)
-
-            # Buscar el archivo model.pkl y moverlo a la carpeta local_path en caso de que se encuentre en una subcarpeta
-            for root, dirs, files in os.walk(local_path):
-                for file in files:
-                    if file.startswith("model"):
-                        logging.info(f"Encontrado archivo model.pkl en: {root}")
-                        os.rename(os.path.join(root, file), os.path.join(local_path + '/model', file))
-                    elif file.startswith("requirements"):
-                        logging.info(f"Encontrado archivo requirements.txt en: {root}")
-                        os.rename(os.path.join(root, file), os.path.join(path, file))
-
-        def modify_requirements_file(path):
-            required_packages = ["fastapi", "uvicorn", "pydantic", "numpy"]
-
-            with open(f"{path}/requirements.txt", "r") as f:
-                lines = f.readlines()
-
-            with open(f"{path}/requirements.txt", "w") as f:
-                for line in lines:
-                    if line.strip() not in required_packages:
-                        f.write(line)
-
-                f.write("\n")
-
-                for package in required_packages:
-                    f.write(f"{package}\n")
-
-
-        logging.warning(f"Downloading artifacts from run_id: {run_id['best_run']}")
-        download_artifacts(run_id['best_run'], path)
-        modify_requirements_file(path)
-
-        args = [
-            "/kaniko/executor",
-            f"--dockerfile={path}/Dockerfile",
-            f"--context={path}",
-            f"--destination={endpoint}", 
-            f"--cache=false"
-        ]
-        result = subprocess.run(
-            args,
-            check=True  # Lanza una excepción si el comando devuelve un código diferente de cero
-        )
-        logging.warning(f"Kaniko executor finished with return code: {result.returncode}")
         
-        
+        return build_inference(run_id)
         
         
     @task.kubernetes(
@@ -374,15 +300,15 @@ def Redwine_production_example():
     
         redis_client.delete(*ids)
     
-    read_df_result = read_df_task()
-    process_df_result = process_df_task(read_df_result)
-    train_elastic_result = train_elastic_task(process_df_result)
-    SVC_train_result = SVC_train_task(process_df_result)
+    read_result = read_task()
+    process_result = process_task(read_result)
+    svc_result = svc_task(process_result)
+    elastic_result = elastic_task(process_result)
     select_best_result = select_best_task()
-    build_inference = build_inference_task(select_best_result)
-    redis_task_result = redis_clean_task([read_df_result, process_df_result])
+    build_result = build_task(select_best_result)
+    redis_task_result = redis_clean_task([read_result, process_result])
     
     # Define the order of the pipeline
-    read_df_result >> process_df_result >> [train_elastic_result, SVC_train_result] >> select_best_result >> build_inference >> redis_task_result
+    read_result >> process_result >> [svc_result, elastic_result] >>  select_best_result >> build_result >> redis_task_result
 # Call the DAG 
-Redwine_production_example()
+Demo_CT1()
