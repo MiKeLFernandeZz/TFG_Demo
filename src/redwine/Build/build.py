@@ -50,7 +50,8 @@ def build_inference(run_id):
         f"--dockerfile={path}/Dockerfile",
         f"--context={path}",
         f"--destination={endpoint}",
-        f"--cache=false"
+        f"--cache=false",
+        f"--single-snapshot"
     ]
     result = subprocess.run(
         args,
