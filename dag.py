@@ -260,8 +260,8 @@ def Demo_CT1():
         volume_mounts=[volume_mount],
         do_xcom_push=True,
         container_resources=k8s.V1ResourceRequirements(
-            requests={'cpu': '0.5'},
-            limits={'cpu': '0.5'}
+            requests={'cpu': '1'},
+            limits={'cpu': '1.5'}
         ),
         priority_class_name='medium-priority',
         env_vars=env_vars
