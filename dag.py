@@ -288,7 +288,7 @@ def Redwine_production_example():
         env_vars=env_vars
     )
     def build_inference_task(run_id):
-        import mlflow 
+        import mlflow
         import os
         import logging
         import subprocess
