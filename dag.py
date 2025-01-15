@@ -340,7 +340,7 @@ def Redwine_production_example():
             "/kaniko/executor",
             f"--dockerfile={path}/Dockerfile",
             f"--context={path}",
-            f"--destination={endpoint}",
+            f"--destination={endpoint}", 
             f"--cache=false"
         ]
         result = subprocess.run(

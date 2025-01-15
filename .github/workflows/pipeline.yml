@@ -52,8 +52,8 @@ jobs:
             - name: Trigger central repo workflow
               uses: convictional/trigger-workflow-and-wait@v1.6.1
               with:
-                  owner: CLARUS-Project
-                  repo: ai-toolkit-central
+                  owner: MiKeLFernandeZz
+                  repo: central-repo
                   github_token: ${{  secrets.CENTRAL_REPO_TOKEN  }}
                   workflow_file_name: sync_submodule.yml 
                   ref: main
