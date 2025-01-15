@@ -251,7 +251,7 @@ def Demo_CT1():
         return run_id
     
     @task.kubernetes(
-        image='clarusproject/dag-image:1.0.0-slim',
+        image='clarusproject/dag-image:kaniko',
         name='build',
         task_id='build',
         namespace='airflow',
@@ -279,7 +279,7 @@ def Demo_CT1():
         
         
     @task.kubernetes(
-        image='clarusproject/dag-image:kaniko',
+        image='clarusproject/dag-image:1.0.0-slim',
         name='redis_clean',
         task_id='redis_clean',
         namespace='airflow',
