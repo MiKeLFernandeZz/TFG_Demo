@@ -261,7 +261,7 @@ def Demo_CT1():
         do_xcom_push=True,
         container_resources=k8s.V1ResourceRequirements(
             requests={'cpu': '1'},
-            limits={'cpu': '1.5'}
+            limits={'cpu': '2.5'}
         ),
         priority_class_name='medium-priority',
         env_vars=env_vars
