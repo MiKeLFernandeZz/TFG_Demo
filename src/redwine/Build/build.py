@@ -4,6 +4,7 @@ import logging
 import subprocess
 
 def build_inference(run_id):
+    os.environ["container"] = "docker"
     path = '/git/TFG_Demo/build_docker'
     endpoint = 'registry-docker-registry.registry.svc.cluster.local:5001/redwine:prod'
 
