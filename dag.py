@@ -10,7 +10,7 @@ from airflow.models import Variable
     catchup=False,
     tags=['demo', 'CT1'],
 )
-def Demo_CT1():
+def test_dag():
 
     env_vars={
         "POSTGRES_USERNAME": Variable.get("POSTGRES_USERNAME"),
@@ -311,4 +311,4 @@ def Demo_CT1():
     # Define the order of the pipeline
     read_result >> process_result >> [svc_result, elastic_result] >>  select_best_result >> build_result >> redis_task_result
 # Call the DAG 
-Demo_CT1()
+test_dag()
