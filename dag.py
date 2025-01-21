@@ -3,7 +3,7 @@ from airflow.decorators import dag, task
 from kubernetes.client import models as k8s
 from airflow.models import Variable
 
-@dag(
+@dag( 
     description='Esto es una demo de CT1',
     schedule_interval=None, 
     start_date=datetime(2025, 1, 15),
