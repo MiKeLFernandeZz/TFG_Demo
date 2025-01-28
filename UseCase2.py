@@ -71,7 +71,8 @@ def useCase2():
             f"--context={path}",
             f"--destination={endpoint}",
             "--insecure",
-            f"--cache=false"
+            f"--cache=false",
+            "--single-snapshot"
         ]
         result = subprocess.run(
             args,
