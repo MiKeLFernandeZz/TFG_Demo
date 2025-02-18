@@ -71,8 +71,7 @@ def useCase2():
             f"--context={path}",
             f"--destination={endpoint}",
             "--insecure",
-            "--cache=true",
-            "--cache-repo=172.16.57.20:5000/cache"
+            "--cache=false"
         ]
         result = subprocess.run(
             args,
